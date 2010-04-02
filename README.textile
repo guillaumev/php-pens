@@ -50,4 +50,6 @@ h1. Credits
 
 The author of the library is Guillaume Viguier-Just <guillaume@viguierjust.com> and this library has been realized mainly for use in the Chamilo project (http://www.chamilo.org).
 
+This library was realized as part of my work in Beeznest Latino (http://www.beeznest.com), for the Chamilo project.
+
 Also note the use of a library called rfc2396regexes written by Rudy Desjardins and distributed as GPL v2

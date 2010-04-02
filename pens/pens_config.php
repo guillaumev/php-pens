@@ -53,7 +53,7 @@ class PENSConfig {
 	 * Allowed package types
 	 * @var array
 	 */
-	public static $allowed_package_types = array("aicc-pkg", "scorm-pif", "lms-qti");
+	public static $allowed_package_types = array("aicc-pkg", "scorm-pif", "ims-qti");
 	
 	/**
 	 * Allowed package formats
