@@ -1,0 +1,4 @@
+* Implement the PENSClient class
+* Allow to send receipts with mailto URLs
+* Implement the sendAlert method in PENSServer
+
