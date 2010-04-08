@@ -51,7 +51,7 @@ pre.. require_once("pens/pens.php");
 // Create a request handler if you need one. This allows you to do some processing on the requests (store them in a DB, send them to an email address etc...)
 // You do not need to create a request handler if you do not want to process the requests
 class MyRequestHandler extends PENSRequestHandler {
-	public function processRequest($request) {
+	public function processRequest($request, $response) {
 		// Do the processing of the alert or the receipt here
 	}
 }

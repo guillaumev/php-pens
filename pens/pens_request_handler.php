@@ -41,7 +41,8 @@ abstract class PENSRequestHandler {
 	 * Processes the request. Must be implemented by subclasses
 	 * 
 	 * @param PENSRequest Alert or Receipt request sent by the server
+	 * @param PENSResponse Response sent by the server (error, error-text etc...)
 	 */
-	abstract public function processRequest($request);
+	abstract public function processRequest($request, $response);
 }
 

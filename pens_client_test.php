@@ -26,7 +26,7 @@
 require_once(dirname(__FILE__)."/pens.php");
 
 class MyRequestHandler extends PENSRequestHandler {
-	public function processRequest($request) {
+	public function processRequest($request, $response) {
 		// Do the processing of the alert or the receipt here
 	}
 }

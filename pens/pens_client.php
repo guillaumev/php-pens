@@ -27,6 +27,7 @@
  */
  
 require_once(dirname(__FILE__)."/pens_controller.php");
+require_once(dirname(__FILE__)."/pens_request_handler.php");
 
 /**
  * PENSClient
@@ -100,7 +101,7 @@ class PENSClient extends PENSController {
 			if($command == "alert" || $command == "receipt") {
 				if(!is_null($this->_request_handler)) {
 					// Call the handler
-					$this->_request_handler->processRequest($request);
+					$this->_request_handler->processRequest($request, new PENSResponse($_REQUEST));
 				}
 				$this->sendResponse(new PENSResponse(0, $command." received and understood"));
 			}

@@ -79,6 +79,11 @@ require_once(dirname(__FILE__)."/pens_exception.php");
 		} else if(is_string($error)){
 			// Parse the string
 			$this->parseResponse($error);
+		} else if(is_array($error)) {
+			// Try to build from array
+			$this->_error = $error["error"];
+			$this->_error_text = $error["error-text"];
+			$this->_pens_data = $error["pens-data"];
 		} else {
 			$this->_error = $error;
 			$this->_error_text = $error_text;
