@@ -101,31 +101,43 @@ class PENSServer extends PENSController {
 		try {
 			// First, try to parse the request
 			$request = $this->parseRequest();
-			// Then, send a success response to the client
-			$this->sendResponse(new PENSResponse(0, "collect command received and understood"));
+			if(isset($_REQUEST['process'])) {
+				// Collect the package and process it
+				$receipt = null;
+				$path_to_package = null;
+				try {
+					// Collect the package
+					$path_to_package = $this->collectPackage($request);
+					$receipt = new PENSResponse(0, "package successfully collected");
+				} catch(PENSException $e) {
+					$receipt = new PENSResponse($e);
+				}
+				// Send receipt
+				$response = $this->sendReceipt($request, $receipt);
+				if(!is_null($response) && !is_null($path_to_package)) {
+					if($response->getError() === 0) {
+						// Process package
+						$this->processPackage($request, $path_to_package);
+					}
+					unlink($path_to_package);
+				}
+			} else {
+				// Then, send a success response to the client
+				$this->sendResponse(new PENSResponse(0, "collect command received and understood"));
+				// Send a request to process the package: fake multithreading
+				$params = $_REQUEST;
+				$params['process'] = 1;
+				$ch = curl_init();
+				curl_setopt($ch, CURLOPT_URL, $_SERVER['SCRIPT_URI']);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+				curl_setopt($ch, CURLOPT_TIMEOUT, 1);
+				curl_exec($ch);
+				curl_close($ch);
+			}
+				
 		} catch(PENSException $e) {
 			// If we could not parse the request, send the error back to the client
 			$this->sendResponse(new PENSResponse($e));
-		}
-		
-		if(!is_null($request)) {
-			$receipt = null;
-			$path_to_package = null;
-			try {
-				// Collect the package
-				$path_to_package = $this->collectPackage($request);
-				$receipt = new PENSResponse(0, "package successfully collected");
-			} catch(PENSException $e) {
-				$receipt = new PENSResponse($e);
-			}
-			// Send receipt
-			$response = $this->sendReceipt($request, $receipt);
-			if(!is_null($response) && !is_null($path_to_package)) {
-				if($response->getError() === 0) {
-					// Process package
-					$this->processPackage($request, $path_to_package);
-				}
-			}
 		}
 	}
 	
@@ -213,6 +225,54 @@ class PENSServer extends PENSController {
 	}
 	
 	/**
+	 * Sends an alert or a receipt. Called by sendReceipt and sendAlert
+	 * 
+	 * @param PENSRequest Original collect request
+	 * @param PENSResponse Reponse to send in the receipt or the alert
+	 * @param string Mode (alert | receipt)
+	 * @return PENSResponse Response
+	 */
+	protected function sendAlertOrReceipt($request, $response, $mode) {
+		if($mode == "alert") {
+			$url = $request->getAlerts();
+		} else {
+			$url = $request->getReceipt();
+		}
+		if(!empty($url)) {
+			$url_components = parse_url($url);
+			$scheme = $url_components["scheme"];
+			if($scheme == "mailto") {
+				$to = $url_components["path"];
+				if($mode == "alert") {
+					$subject = "PENS Alert for ".$request->getPackageId();
+				} else {
+					$subject = "PENS Receipt for ".$request->getPackageId();
+				}
+				$message = $response->__toString();
+				mail($to, $subject, $message);
+				return new PENSResponse(0, "");
+			} else if($scheme == "http" || $scheme == "https") {
+				if($mode == "alert") {
+					$params = array_merge($request->getSendAlertArray(), $response->getArray());
+				} else {
+					$params = array_merge($request->getSendReceiptArray(), $response->getArray());
+				}
+				$ch = curl_init($url);
+				curl_setopt($ch, CURLOPT_POST, true);
+				curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+				$data = curl_exec($ch);
+				curl_close($ch);
+				if($data === false) {
+					return null;
+				} else {
+					return new PENSResponse($data);
+				}
+			}
+		}
+	}
+	
+	/**
 	 * Sends a receipt. Returns a PENSResponse in case of success, null if a problem occured
 	 * 
 	 * @param PENSRequest Original collect request
@@ -220,28 +280,7 @@ class PENSServer extends PENSController {
 	 * @return PENSResponse Response
 	 */
 	protected function sendReceipt($request, $receipt) {
-		$url = $request->getReceipt();
-		$url_components = parse_url($url);
-		$scheme = $url_components["scheme"];
-		if($scheme == "mailto") {
-			$to = $url_components["path"];
-			$subject = "PENS Receipt for ".$request->getPackageId();
-			$message = $receipt->__toString();
-			mail($to, $subject, $message);
-			return new PENSResponse(0, "Receipt sent");
-		} else if($scheme == "http" || $scheme == "https") {
-			$ch = curl_init($url);
-			curl_setopt($ch, CURLOPT_POST, true);
-			curl_setopt($ch, CURLOPT_POSTFIELDS, array_merge($request->getSendReceiptArray(), $receipt->getArray()));
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			$data = curl_exec($ch);
-			curl_close($ch);
-			if($data === false) {
-				return null;
-			} else {
-				return new PENSResponse($data);
-			}
-		}
+		return $this->sendAlertOrReceipt($request, $receipt, "receipt");
 	}
 	
 	/**
@@ -262,8 +301,7 @@ class PENSServer extends PENSController {
 	 * @return PENSResponse Response
 	 */
 	public function sendAlert($request, $alert) {
-		// TODO: To be implemented
-		return new PENSResponse(0);
+		return $this->sendAlertOrReceipt($request, $alert, "alert");
 	}
 	
 }
