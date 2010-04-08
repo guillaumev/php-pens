@@ -37,7 +37,7 @@ $handler->setSupportedPackageFormats(array("zip"));
 
 // Initialize the server
 $server = PENSServer::singleton();
-$server->setHandler($handler);
+$server->setPackageHandler($handler);
 
 // The server should only receive collect commands, so call the receiveCollect method
 $server->receiveCollect();

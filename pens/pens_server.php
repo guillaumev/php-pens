@@ -46,7 +46,7 @@ class PENSServer extends PENSController {
 	 * Instance of the PENSServer
 	 * @var PENSServer
 	 */
-	private static $_instance = null;
+	private static $_instance;
 	
 	/**
 	 * Package handler
@@ -63,10 +63,10 @@ class PENSServer extends PENSController {
 	/**
 	 * Singleton method
 	 */
-	public static singleton() {
+	public static function singleton() {
 		if(!isset(self::$_instance)) {
 			$c = __CLASS__;
-			self::$_instance = $c;
+			self::$_instance = new $c;
 		}
 		return self::$_instance;
 	}
