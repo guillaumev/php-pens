@@ -42,6 +42,30 @@ $server->setPackageHandler($handler);
 // The server should only receive collect commands, so call the receiveCollect method
 $server->receiveCollect();
 
+h1. How do I create a client ?
+
+The role of the PENSClient is simply to receive receipts and alerts from the server and process them. Here is how to create a client.
+
+pre.. require_once("pens/pens.php");
+
+// Create a request handler if you need one. This allows you to do some processing on the requests (store them in a DB, send them to an email address etc...)
+// You do not need to create a request handler if you do not want to process the requests
+class MyRequestHandler extends PENSRequestHandler {
+	public function processRequest($request) {
+		// Do the processing of the alert or the receipt here
+	}
+}
+
+// Instantiate the handler
+$handler = new MyRequestHandler();
+
+// Create the client and set the request handler
+$client = PENSClient::singleton();
+$client->setRequestHandler($handler);
+
+// Parse and process the request
+$client->receiveRequest();
+
 h1. Licence
 
 The php-pens library is published under the GNU GPL 3 licence (see COPYING)

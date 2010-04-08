@@ -32,8 +32,7 @@ require_once(dirname(__FILE__)."/pens_config.php");
  * PENSPackageHandler
  * 
  * This class is an abstract class used to handle the processing of the package on the server side. Create a class that inherits from
- * this class and implements the processPackage method, then give an instance of the newly created class to the constructor of the
- * PENSServer class.
+ * this class and implements the processPackage method, then set the package handler of the PENSServer class using the instance newly created
  * 
  * @package PENS
  * @author Guillaume Viguier-Just <guillaume@viguierjust.com>

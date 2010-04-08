@@ -101,38 +101,40 @@ class PENSServer extends PENSController {
 		try {
 			// First, try to parse the request
 			$request = $this->parseRequest();
-			if(isset($_REQUEST['process'])) {
-				// Collect the package and process it
-				$receipt = null;
-				$path_to_package = null;
-				try {
-					// Collect the package
-					$path_to_package = $this->collectPackage($request);
-					$receipt = new PENSResponse(0, "package successfully collected");
-				} catch(PENSException $e) {
-					$receipt = new PENSResponse($e);
-				}
-				// Send receipt
-				$response = $this->sendReceipt($request, $receipt);
-				if(!is_null($response) && !is_null($path_to_package)) {
-					if($response->getError() === 0) {
-						// Process package
-						$this->processPackage($request, $path_to_package);
+			if($request->getCommand() == "collect") {
+				if(isset($_REQUEST['process'])) {
+					// Collect the package and process it
+					$receipt = null;
+					$path_to_package = null;
+					try {
+						// Collect the package
+						$path_to_package = $this->collectPackage($request);
+						$receipt = new PENSResponse(0, "package successfully collected");
+					} catch(PENSException $e) {
+						$receipt = new PENSResponse($e);
 					}
-					unlink($path_to_package);
+					// Send receipt
+					$response = $this->sendReceipt($request, $receipt);
+					if(!is_null($response) && !is_null($path_to_package)) {
+						if($response->getError() === 0) {
+							// Process package
+							$this->processPackage($request, $path_to_package);
+						}
+						unlink($path_to_package);
+					}
+				} else {
+					// Then, send a success response to the client
+					$this->sendResponse(new PENSResponse(0, "collect command received and understood"));
+					// Send a request to process the package: fake multithreading
+					$params = $_REQUEST;
+					$params['process'] = 1;
+					$ch = curl_init();
+					curl_setopt($ch, CURLOPT_URL, $_SERVER['SCRIPT_URI']);
+					curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
+					curl_setopt($ch, CURLOPT_TIMEOUT, 1);
+					curl_exec($ch);
+					curl_close($ch);
 				}
-			} else {
-				// Then, send a success response to the client
-				$this->sendResponse(new PENSResponse(0, "collect command received and understood"));
-				// Send a request to process the package: fake multithreading
-				$params = $_REQUEST;
-				$params['process'] = 1;
-				$ch = curl_init();
-				curl_setopt($ch, CURLOPT_URL, $_SERVER['SCRIPT_URI']);
-				curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
-				curl_setopt($ch, CURLOPT_TIMEOUT, 1);
-				curl_exec($ch);
-				curl_close($ch);
 			}
 				
 		} catch(PENSException $e) {
