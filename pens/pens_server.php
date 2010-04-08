@@ -141,7 +141,7 @@ class PENSServer extends PENSController {
 		if(!in_array($request->getPackageType(), $supported_package_types)) {
 			throw new PENSException(1430);
 		}
-		$supported_package_formats = $this->_package_handler->getSupportedPackageTypes();
+		$supported_package_formats = $this->_package_handler->getSupportedPackageFormats();
 		if(!in_array($request->getPackageFormat(), $supported_package_formats)) {
 			throw new PENSException(1431);
 		}
@@ -157,10 +157,11 @@ class PENSServer extends PENSController {
 			$tmp = "/tmp";
 		}
 		$path_to_file = $tmp."/".$request->getFilename();
+		$fp = fopen($path_to_file, 'w');
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $request->getPackageUrl());
 		curl_setopt($ch, CURLOPT_HEADER, false);	
-		curl_setopt($ch, CURLOPT_FILE, $path_to_file);
+		curl_setopt($ch, CURLOPT_FILE, $fp);
 		if(!is_null($request->getPackageUrlUserId())) {
 			curl_setopt($ch, CURLOPT_USERPWD, $request->getPackageUrlUserId().":".$request->getPackageUrlPassword());
 		}
@@ -223,11 +224,15 @@ class PENSServer extends PENSController {
 		$url_components = parse_url($url);
 		$scheme = $url_components["scheme"];
 		if($scheme == "mailto") {
-			// TODO: To be implemented
+			$to = $url_components["path"];
+			$subject = "PENS Receipt for ".$request->getPackageId();
+			$message = $receipt->__toString();
+			mail($to, $subject, $message);
+			return new PENSResponse(0, "Receipt sent");
 		} else if($scheme == "http" || $scheme == "https") {
 			$ch = curl_init($url);
 			curl_setopt($ch, CURLOPT_POST, true);
-			curl_setopt($ch, CURLOPT_POSTFIELDS, $request->getSendReceiptArray());
+			curl_setopt($ch, CURLOPT_POSTFIELDS, array_merge($request->getSendReceiptArray(), $receipt->getArray()));
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 			$data = curl_exec($ch);
 			curl_close($ch);

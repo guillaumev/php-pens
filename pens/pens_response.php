@@ -138,12 +138,32 @@ require_once(dirname(__FILE__)."/pens_exception.php");
 	 * Sends the response content through HTTP headers
 	 */
 	public function send() {
-		$eol = PENSConfig::$eol;
 		header("Content-Type: text/plain");
-		print "error=".$this->_error.$eol;
-		print "error-text=".$this->_error_text.$eol;
-		print "version=".PENSConfig::$version.$eol;
-		print "pens-data=".$this->_pens_data.$eol;
+		print $this;
+	}
+	
+	/**
+	 * Returns an associative array of the response
+	 * 
+	 * @return array Associative array
+	 */
+	public function getArray() {
+		return array("error" => $this->_error,
+			"error-text" => $this->_error_text,
+			"version" => PENSConfig::$version,
+			"pens-data" => $this->_pens_data);
+	}
+	
+	/**
+	 * Transforms the object into a string
+	 */
+	public function __toString() {
+		$eol = PENSConfig::$eol;
+		$return = "error=".$this->_error.$eol;
+		$return .= "error-text=".$this->_error_text.$eol;
+		$return .= "version=".PENSConfig::$version.$eol;
+		$return .= "pens-data=".$this->_pens_data.$eol;
+		return $return;
 	}
  
  }

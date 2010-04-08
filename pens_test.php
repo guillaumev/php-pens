@@ -27,7 +27,8 @@ require_once(dirname(__FILE__)."/pens.php");
 
 class MyPackageHandler extends PENSPackageHandler {
 	public function processPackage($request, $path_to_package) {
-		// Do nothing with the package
+		// Copy the package to the current directory
+		copy($path_to_package,  dirname(__FILE__)."/".basename($path_to_package));
 	}
 }
 
