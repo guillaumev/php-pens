@@ -32,7 +32,7 @@ require_once("simpletest/autorun.php");
 require_once("simpletest/web_tester.php");
 
 define(PENS_TEST_SERVER_URL, "http://localhost/pens/pens_server_test.php");
-define(PENS_TEST_RECEIPT_MAILTO, "mailto:guillaume.viguier@beeznest.com");
+define(PENS_TEST_RECEIPT_MAILTO, "mailto:test@test.com");
 
 /**
  * Functional tests for the PENS Server
