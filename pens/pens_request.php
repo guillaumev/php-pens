@@ -308,7 +308,7 @@ abstract class PENSRequest extends PENSMessage {
 	}
 	
 	public function getFilename() {
-		return strrchr($this->_package_url, "/");
+		return substr(strrchr($this->_package_url, "/"), 1);
 	}
 	
 	public function getPackageUrlUserId() {
