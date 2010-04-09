@@ -417,7 +417,7 @@ abstract class PENSRequest extends PENSMessage {
 	 * @throws PENSException with code 2011 if invalid
 	 */
 	public function setReceipt($receipt) {
-		if($this->getCommand() == "collect") {
+		if($this instanceof PENSRequestCollect) {
 			if (preg_match('/'.ABSOLUTEURI_2396.'/', $receipt)) {
 				$this->_receipt = $receipt;
 			} else {
