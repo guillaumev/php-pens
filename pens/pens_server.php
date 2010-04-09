@@ -128,8 +128,12 @@ class PENSServer extends PENSController {
 					// Send a request to process the package: fake multithreading
 					$params = $_REQUEST;
 					$params['process'] = 1;
+					$scheme = "http";
+					if(!empty($_SERVER['HTTPS'])) {
+						$scheme = "https";
+					}
 					$ch = curl_init();
-					curl_setopt($ch, CURLOPT_URL, $_SERVER['SCRIPT_URI']);
+					curl_setopt($ch, CURLOPT_URL, $scheme."://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
 					curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
 					curl_setopt($ch, CURLOPT_TIMEOUT, 1);
 					curl_exec($ch);
