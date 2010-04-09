@@ -56,7 +56,7 @@ abstract class PENSRequest extends PENSMessage {
 	protected $_command = null;
 	
 	/**
-	 * Package type being used. The only valid values are aicc-pkg, scorm-pif, lms-qti. Required
+	 * Package type being used. The only valid values are aicc-pkg, scorm-pif, ims-qti. Required
 	 * @var string
 	 */
 	protected $_package_type = null;
